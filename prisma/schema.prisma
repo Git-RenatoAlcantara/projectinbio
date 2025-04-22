@@ -1,0 +1,77 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String    @id @unique @default(uuid())
+  email     String    @unique
+  createdAt DateTime  @default(now())
+  profile   Profile[]
+
+  @@map("user")
+}
+
+model Project {
+  id                 String  @id @unique @default(uuid())
+  imageUrl           String
+  projectName        String
+  projectDescription String
+  projectUrl         String
+  link               Profile? @relation(fields: [linkId], references: [link], onDelete: Cascade)
+  linkId             String?
+  clicks             Int     @default(0)
+
+  @@map("project")
+}
+
+model CustomSocial {
+  id        String   @id @unique @default(uuid())
+  title     String?
+  url       String?
+  profile   Profile? @relation(fields: [profileId], references: [link], onDelete: Cascade)
+  profileId String?
+  createdAt DateTime @default(now())
+}
+
+model SocialPage {
+  id        String   @id @unique @default(uuid())
+  name      Social
+  link      String?
+  profile   Profile?  @relation(fields: [profileId], references: [link], onDelete: Cascade)
+  profileId String?
+  createdAt DateTime @default(now())
+}
+
+model Profile {
+  id           String         @id @unique @default(uuid())
+  link         String         @unique
+  socialPage   SocialPage[]
+  project      Project[]
+  name         String?
+  description  String?
+  profileImage String?
+  CustomSocial CustomSocial[]
+  totalVisits  Int            @default(0)
+  User         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
+
+  @@map("link")
+}
+
+enum Social {
+  INSTAGRAM
+  TWITTER
+  LINKEDIN
+  GITHUB
+}
